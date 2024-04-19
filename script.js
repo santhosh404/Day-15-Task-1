@@ -1,6 +1,71 @@
-const tBody = document.getElementById('tableBody');
-const previous = document.getElementById('previous');
-const next = document.getElementById('next');
+// Create the necessary elements
+let container = document.getElementById('container');
+
+//Table elements
+let div = document.createElement('div')
+div.classList.add('table-responsive');
+
+let table = document.createElement('table');
+table.id = 'table';
+table.classList.add('table', 'table-bordered');
+
+let thead = document.createElement('thead');
+let theadRow = document.createElement('tr');
+theadRow.classList.add('table-secondary');
+
+let idHeader = document.createElement('th');
+idHeader.textContent = 'Id';
+let emailHeader = document.createElement('th');
+emailHeader.textContent = 'Email';
+let nameHeader = document.createElement('th');
+nameHeader.textContent = 'Name';
+
+let tbody = document.createElement('tbody');
+tbody.id = 'tableBody';
+
+
+
+
+// Append elements to their respective parents
+theadRow.appendChild(idHeader);
+theadRow.appendChild(emailHeader);
+theadRow.appendChild(nameHeader);
+thead.appendChild(theadRow);
+table.appendChild(thead);
+table.appendChild(tbody);
+div.appendChild(table);
+container.appendChild(div);
+
+
+const previous = document.createElement('button');
+previous.classList.add('btn');
+previous.id = "previous";
+previous.name = "buttons";
+previous.setAttribute('onclick', 'handlePrevious()');
+
+previous.innerHTML = 'Previous';
+
+const first = document.createElement('button');
+first.classList.add('btn')
+first.setAttribute('data-page-number', 'first');
+first.name = "buttons";
+first.innerHTML = 'First';
+first.setAttribute('onclick', 'handleFirst()');
+
+
+const last = document.createElement('button');
+last.classList.add('btn')
+last.setAttribute('data-page-number', 'last');
+last.name = "buttons";
+last.innerHTML = 'Last';
+last.setAttribute('onclick', 'handleLast()');
+
+const next = document.createElement('button');
+next.classList.add('btn');
+next.id = "next";
+next.setAttribute('onclick', 'handleNext()');
+next.name = "buttons"
+next.innerHTML = 'Next';
 
 const data = [
     {
@@ -511,7 +576,12 @@ let end = 10;
 
 document.addEventListener('DOMContentLoaded', function () {
     if (currentPage === 1) {
+        const currentActive = document.querySelector(`[data-page-number="1"]`);
+        if (currentActive) {
+            currentActive.classList.add('active');
+        }
         previous.classList.add('disabled');
+        first.classList.add('disabled');
     }
     data.slice(start, end).forEach(d => {
         const tr = document.createElement('tr');
@@ -524,24 +594,76 @@ document.addEventListener('DOMContentLoaded', function () {
         td3.innerText = d.name;
 
         tr.append(td1, td2, td3);
-        tBody.appendChild(tr);
+        tbody.appendChild(tr);
     })
 })
 
+function handleLast() {
+    const btns = document.getElementsByName('buttons');
+    for (i = 0; i < btns.length; i++) {
+        if (btns[i].classList.contains('active')) {
+            btns[i].classList.remove('active');
+        }
+    }
+
+    currentPage = 10;
+
+    const currentActive = document.querySelector(`[data-page-number="${currentPage}"]`);
+    if (currentActive) {
+        currentActive.classList.add('active');
+    }
+
+    first.classList.remove('disabled');
+    previous.classList.remove('disabled');
+    last.classList.add('disabled');
+    next.classList.add('disabled');
+
+    start = (currentPage * 10) - 10;
+    end = currentPage * 10;
+    tbody.innerHTML = '';
+    data.slice(start, end).forEach(d => {
+        const tr = document.createElement('tr');
+        const td1 = document.createElement('td');
+        const td2 = document.createElement('td');
+        const td3 = document.createElement('td');
+
+        td1.innerText = d.id;
+        td2.innerText = d.email;
+        td3.innerText = d.name;
+
+        tr.append(td1, td2, td3);
+        tbody.append(tr);
+
+    })
+}
 
 function handleNext() {
-    currentPage = currentPage + 1;
+
+    currentPage = +currentPage + 1;
+    const btns = document.getElementsByName('buttons');
+    for (i = 0; i < btns.length; i++) {
+        if (btns[i].classList.contains('active')) {
+            btns[i].classList.remove('active');
+        }
+    }
+
+    const currentActive = document.querySelector(`[data-page-number="${currentPage}"]`);
+    if (currentActive) {
+        currentActive.classList.add('active');
+    }
 
     if (currentPage <= 10) {
         if (currentPage === 10) {
             next.classList.add('disabled');
+            last.classList.add('disabled');
         }
         else {
+            first.classList.remove('disabled');
             previous.classList.remove('disabled');
         }
         start = (currentPage * 10) - 10;
         end = currentPage * 10;
-        tBody.innerHTML = '';
+        tbody.innerHTML = '';
         data.slice(start, end).forEach(d => {
             const tr = document.createElement('tr');
             const td1 = document.createElement('td');
@@ -553,26 +675,78 @@ function handleNext() {
             td3.innerText = d.name;
 
             tr.append(td1, td2, td3);
-            tBody.append(tr);
+            tbody.append(tr);
+            next.classList.add('active')
         })
     }
+}
+
+function handleFirst() {
+    const btns = document.getElementsByName('buttons');
+    for (i = 0; i < btns.length; i++) {
+        if (btns[i].classList.contains('active')) {
+            btns[i].classList.remove('active');
+        }
+    }
+
+    currentPage = 1;
+
+    const currentActive = document.querySelector(`[data-page-number="${currentPage}"]`);
+    if (currentActive) {
+        currentActive.classList.add('active');
+    }
+
+    first.classList.add('disabled');
+    previous.classList.add('disabled');
+    last.classList.remove('disabled');
+    next.classList.remove('disabled');
+
+    start = (currentPage * 10) - 10;
+    end = currentPage * 10;
+    tbody.innerHTML = '';
+    data.slice(start, end).forEach(d => {
+        const tr = document.createElement('tr');
+        const td1 = document.createElement('td');
+        const td2 = document.createElement('td');
+        const td3 = document.createElement('td');
+
+        td1.innerText = d.id;
+        td2.innerText = d.email;
+        td3.innerText = d.name;
+
+        tr.append(td1, td2, td3);
+        tbody.append(tr);
+    })
 }
 
 function handlePrevious() {
 
+    const btns = document.getElementsByName('buttons');
+    for (i = 0; i < btns.length; i++) {
+        if (btns[i].classList.contains('active')) {
+            btns[i].classList.remove('active');
+        }
+    }
+
     currentPage = currentPage - 1;
 
+    const currentActive = document.querySelector(`[data-page-number="${currentPage}"]`);
+    if (currentActive) {
+        currentActive.classList.add('active');
+    }
 
     if (currentPage >= 1) {
         if (currentPage === 1) {
             previous.classList.add('disabled');
+            first.classList.add('disabled');
         }
         else {
+            last.classList.remove('disabled')
             next.classList.remove('disabled');
         }
         start = (currentPage * 10) - 10;
         end = currentPage * 10;
-        tBody.innerHTML = '';
+        tbody.innerHTML = '';
         data.slice(start, end).forEach(d => {
             const tr = document.createElement('tr');
             const td1 = document.createElement('td');
@@ -584,7 +758,86 @@ function handlePrevious() {
             td3.innerText = d.name;
 
             tr.append(td1, td2, td3);
-            tBody.append(tr);
+            tbody.append(tr);
+            previous.classList.add('active')
+
         })
     }
 }
+
+
+function handlePaginagionButtons() {
+    const div = document.createElement('div');
+    div.id = "buttons";
+    div.classList.add('d-flex', 'justify-content-center', 'gap-2', 'flex-wrap', 'mt-5', 'mb-5');
+
+
+
+    div.append(first, previous);
+    for (let i = 1; i <= 10; i++) {
+        const btn = document.createElement('button');
+        btn.name = 'buttons';
+        btn.innerText = i;
+        btn.classList.add('btn')
+        btn.setAttribute('data-page-number', i);
+        div.appendChild(btn);
+
+        btn.addEventListener('click', function (event) {
+            currentPage = event.target.getAttribute('data-page-number');
+            start = (currentPage * 10) - 10;
+            end = currentPage * 10;
+            tbody.innerHTML = ''
+
+            const btns = document.getElementsByName('buttons');
+            for (i = 0; i < btns.length; i++) {
+                if (btns[i].classList.contains('active')) {
+                    btns[i].classList.remove('active');
+                }
+            }
+
+            if (+currentPage === 1) {
+                previous.classList.add('disabled');
+                first.classList.add('disabled');
+                next.classList.remove('disabled');
+                last.classList.remove('disabled')
+            }
+            else if (+currentPage === 10) {
+                next.classList.add('disabled');
+                last.classList.add('disabled')
+                previous.classList.remove('disabled');
+                first.classList.remove('disabled');
+            }
+            else {
+                previous.classList.remove('disabled');
+                first.classList.remove('disabled');
+                next.classList.remove('disabled');
+                last.classList.remove('disabled')
+            }
+
+            data.slice(start, end).forEach(d => {
+                const tr = document.createElement('tr');
+                const td1 = document.createElement('td');
+                const td2 = document.createElement('td');
+                const td3 = document.createElement('td');
+
+                td1.innerText = d.id;
+                td2.innerText = d.email;
+                td3.innerText = d.name;
+
+                tr.append(td1, td2, td3);
+                tbody.appendChild(tr);
+                event.target.classList.add('active');
+            })
+        })
+
+
+    }
+
+    div.append(next, last);
+    container.appendChild(div);
+
+
+}
+
+
+handlePaginagionButtons();
